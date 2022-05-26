@@ -1,0 +1,19 @@
+configuration {
+	modi: "combi,calc";
+	font: "B612Mono Nerd Font 13";
+	show-icons: true;
+	terminal: "alacritty";
+	icon-theme: "Arc";
+	combi-modi: "drun,run,window,ssh";
+	matching: "fuzzy";
+    timeout {
+        action: "kb-cancel";
+        delay:  0;
+    }
+    filebrowser {
+        directories-first: true;
+        sorting-method:    "name";
+    }
+}
+
+@theme "nord"

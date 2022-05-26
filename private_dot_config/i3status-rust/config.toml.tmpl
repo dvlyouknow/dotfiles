@@ -1,0 +1,97 @@
+# vi:syntax=toml
+
+{{ $nc700 := output
+    ( joinPath .chezmoi.sourceDir "helpers" "bluetooth-device-paired.sh")
+    "Bose NC 700 Head" -}}
+
+{{ $px7 := output
+    ( joinPath .chezmoi.sourceDir "helpers" "bluetooth-device-paired.sh")
+    "PX7 Bowers & Wilkins" -}}
+
+[theme]
+name = "nord-dark"
+[theme.overrides]
+separator = ""
+
+[icons]
+name = "material-nf"
+
+[[block]]
+block = "custom"
+interval = "once"
+command = ''' jq -n --arg k "$(uname -r)" '{"state": "Info", "text": $k}' '''
+json = true
+
+[[block]]
+block = "custom"
+interval = "once"
+signal = 1
+command = ''' current-context '''
+
+[[block]]
+block = "music"
+max_width = 100
+dynamic_width = true
+buttons = [ "play" ]
+
+{{ if $nc700 -}}
+# [[block]]
+# block = "bluetooth"
+# mac = {{ $nc700 | quote }}
+# format = "Bose NC700 {percentage}"
+# format_unavailable = "Bose NC700 x"
+{{- else -}}
+# skipped Bose NC700
+{{- end }}
+
+{{ if $px7 -}}
+# [[block]]
+# block = "bluetooth"
+# mac = {{ $px7 | quote }}
+# hide_disconnected = false
+# format = " B&W PX7 {percentage}"
+# format_unavailable = " B&W PX7 x"
+{{- else -}}
+# skipped PX7
+{{- end }}
+
+[[block]]
+block = "sound"
+on_click = 'pactl set-sink-mute @DEFAULT_SINK@ toggle'
+
+[[block]]
+block = "sound"
+device_kind = 'source'
+on_click = 'pactl set-source-mute @DEFAULT_SOURCE@ toggle'
+
+[[block]]
+block = "weather"
+format = "{weather} {temp}"
+service = { name = "openweathermap", api_key = "{{ .openweathermap.api_key }}", city_id = "4377664", units = "imperial" }
+interval = 900
+
+[[block]]
+block = "time"
+interval = 60
+format = "%a %b %d %R"
+
+# [[block]]
+# block = "custom"
+# interval = "once"
+# command = ''' printf "%s@%s" {{ .chezmoi.username }} {{ .chezmoi.hostname }} '''
+
+[[block]]
+block = "custom"
+command = "browsers GET"
+on_click = "browsers CYCLE"
+interval = "once"
+signal = 2
+
+[[block]]
+block = "notify"
+
+[[block]]
+block = "custom"
+command = "echo \uf011"
+on_click = "powermenu"
+interval = "once"

@@ -1,0 +1,160 @@
+# vi:syntax=toml
+
+{{/* TODO: pull critical temps from sensors output */}}
+{{- $sensors := fromJson "{}" -}}
+{{- if lookPath "sensors" -}}
+{{- $sensors = fromJson ( output "sensors" "-j" ) -}}
+{{- end -}}
+
+{{ $mouse_mac := output
+    ( joinPath .chezmoi.sourceDir "helpers" "bluetooth-device-paired.sh")
+    "LIFT" -}}
+
+[theme]
+name = "nord-dark"
+[theme.overrides]
+separator = ""
+
+[icons]
+name = "material-nf"
+
+{{ if $mouse_mac -}}
+[[block]]
+block = "bluetooth"
+mac = {{ $mouse_mac | quote }}
+{{- else -}}
+# skipped mouse
+{{- end }}
+
+{{ if ( get $sensors "nvme-pci-0400" ) -}}
+[[block]]
+block = "temperature"
+collapsed = false
+chip = "nvme-pci-0400"
+good = 20
+idle = 30
+info = 60
+warning = 70
+format = "/ {max}"
+interval = 5
+{{- else -}}
+# skipped nvme-pci-0400
+{{- end }}
+
+[[block]]
+block = "disk_space"
+path = "/"
+format = "{icon} / {free}"
+info_type = "available"
+unit = "GB"
+warning = 20.0
+alert = 10.0
+interval = 120
+
+[[block]]
+block = "docker"
+format = "T:{total} R:{running} S:{stopped} P:{paused} I:{images}"
+interval = 60
+
+{{ if ( get $sensors "nvme-pci-0100" ) -}}
+[[block]]
+block = "temperature"
+collapsed = false
+chip = "nvme-pci-0100"
+good = 20
+idle = 30
+info = 60
+warning = 70
+format = "~ {max}"
+interval = 5
+{{- else -}}
+# skipped nvme-pci-0100
+{{- end }}
+
+[[block]]
+block = "disk_space"
+path = "/home"
+format = "{icon} ~ {free}"
+info_type = "available"
+unit = "GB"
+warning = 20.0
+alert = 10.0
+interval = 120
+
+{{ $dockerSock := output (joinPath .chezmoi.sourceDir "helpers" "docker-sock-exists.sh") -}}
+{{ if $dockerSock -}}
+[[block]]
+block = "docker"
+format = "T:{total} R:{running} S:{stopped} P:{paused} I:{images}"
+interval = 60
+socket_path = "{{ $dockerSock }}"
+{{- end }}
+
+[[block]]
+block = "memory"
+display_type = "memory"
+format_mem = "{mem_free;G}"
+format_swap = "{swap_free;G}"
+interval = 5
+
+{{ if ( get $sensors "iwlwifi_1-virtual-0" ) -}}
+[[block]]
+block = "temperature"
+collapsed = false
+chip = "iwlwifi_1-virtual-0"
+good = 10
+idle = 20
+info = 65
+warning = 70
+format = " {max}"
+interval = 5
+{{- else -}}
+# skipped iwlwifi_1
+{{- end }}
+
+[[block]]
+block = "net"
+format="{speed_down;M*b} {speed_up;M*b}"
+interval = 5
+
+{{ if ( get $sensors "amdgpu-pci-0c00" ) -}}
+[[block]]
+block = "temperature"
+collapsed = false
+chip = "amdgpu-pci-0c00"
+inputs = [ 'edge' ]
+good = 20
+idle = 30
+info = 70
+warning = 75
+format = "GPU: {max}"
+interval = 5
+{{- else -}}
+# skipped amdgpu
+{{- end }}
+
+[[block]]
+block = "load"
+format = "{1m} : {5m}"
+interval = 5
+
+[[block]]
+block = "cpu"
+format="{frequency} {barchart}"
+interval = 5
+
+{{ if ( get $sensors "k10temp-pci-00c3" ) -}}
+[[block]]
+block = "temperature"
+collapsed = false
+chip = "k10temp-pci-00c3"
+inputs = [ 'Tctl' ]
+good = 20
+idle = 30
+info = 75
+warning = 80
+format = " {max}"
+interval = 5
+{{- else -}}
+# skipped k10temp
+{{- end }}
