@@ -1,0 +1,13 @@
+{{- $email := .email -}}
+{{- if not $email -}}
+{{-   $email = promptString "email" -}}
+{{- end -}}
+
+{{- $fullname := .fullname -}}
+{{- if not $fullname -}}
+{{-   $fullname = promptString "full name" -}}
+{{- end -}}
+
+data:
+    email: {{ $email }}
+    fullname: {{ $fullname }}
